@@ -26,7 +26,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
+app = FastAPI(title="Welcome to Issue Clustering API")
 
 # -------------------
 # MongoDB setup
@@ -99,7 +99,7 @@ async def generate_summary(descriptions: list[str]) -> str:
                 "Complaints:\n- " + "\n- ".join(cleaned)
             )
 
-            model = genai.GenerativeModel("gemini-1.5-flash")
+            model = genai.GenerativeModel("gemini-2.0-flash")
             response = await model.generate_content_async(
                 prompt,
                 generation_config=GenerationConfig(

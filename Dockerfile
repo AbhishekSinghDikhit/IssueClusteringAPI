@@ -8,17 +8,14 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies
+# Install system dependencies required for Python packages (numpy, scikit-learn, etc.)
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    gcc \
+    libblas-dev \
+    libatlas-base-dev \
+    gfortran \
     libssl-dev \
     curl \
     && rm -rf /var/lib/apt/lists/*
-
-# Install pipenv / poetry optional
-# COPY Pipfile Pipfile.lock ./  
-# RUN pip install pipenv && pipenv install --deploy --ignore-pipfile  
 
 # Copy requirements file first for caching
 COPY requirements.txt .
@@ -26,11 +23,19 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the whole app
+# Create a non-root user for security
+RUN useradd -m appuser
+USER appuser
+
+# Copy the entire application
 COPY . .
 
-# Expose port (Render will map this automatically)
+# Expose port (Render maps this automatically)
 EXPOSE 8000
+
+# Add healthcheck for FastAPI
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
 
 # Start the app with uvicorn (Render requires 0.0.0.0 binding)
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

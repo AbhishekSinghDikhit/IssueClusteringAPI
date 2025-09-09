@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+motor
+pymongo
+scikit-learn
+numpy
+python-dotenv
+google-generativeai

@@ -8,14 +8,16 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies required for Python packages (numpy, scikit-learn, etc.)
-RUN apt-get update && apt-get install -y \
+# Install system dependencies with robust error handling
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     libblas-dev \
     libatlas-base-dev \
     gfortran \
     libssl-dev \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+    curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy requirements file first for caching
 COPY requirements.txt .

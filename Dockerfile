@@ -1,5 +1,5 @@
-# Use official lightweight Python image
-FROM python:3.11-slim
+# Use a more robust Python base image to avoid dependency issues
+FROM python:3.11
 
 # Set working directory
 WORKDIR /app
@@ -8,9 +8,11 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies with robust error handling
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+# Update package lists
+RUN apt-get update && apt-get upgrade -y
+
+# Install system dependencies
+RUN apt-get install -y --no-install-recommends \
     libblas-dev \
     libatlas-base-dev \
     gfortran \

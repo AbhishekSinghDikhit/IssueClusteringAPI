@@ -1,5 +1,5 @@
-# Use a more robust Python base image to avoid dependency issues
-FROM python:3.11
+# Use a lightweight Python base image
+FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
@@ -8,20 +8,17 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Update package lists
-RUN apt-get update && apt-get upgrade -y
-
-# Install system dependencies
-RUN apt-get install -y --no-install-recommends \
-    libblas-dev \
-    libatlas-base-dev \
+# Install system dependencies (minimal, no libatlas)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
     gfortran \
     libssl-dev \
-    curl && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements file first for caching
+# Copy requirements first for caching
 COPY requirements.txt .
 
 # Install Python dependencies
@@ -37,7 +34,7 @@ COPY . .
 # Expose port (Render maps this automatically)
 EXPOSE 8000
 
-# Add healthcheck for FastAPI
+# Healthcheck for FastAPI
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
